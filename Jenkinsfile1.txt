@@ -1,0 +1,32 @@
+pipeline {
+    agent any
+    environment{
+       dockerImage = ''
+    }
+    tools{
+        maven "maven3"
+    }
+    stages {
+        stage('Pull the Code') {
+            steps {
+               checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/anoopraj467/Capston']])
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                script{
+                    sh 'mvn compile jib:dockerBuild'
+            }
+            }
+        }
+        stage('Docker Push'){
+            steps{
+                // This step should not normally be used in your script. Consult the inline help for details.
+                withDockerRegistry(credentialsId: 'nexus-cred', url: 'http://20.127.187.74:8085') {
+                // some block
+                    sh 'mvn compile jib:build -Djib.allowInsecureRegistries=true -DsendCredentialsOverHttp'
+                }
+            }
+        }
+    }
+}

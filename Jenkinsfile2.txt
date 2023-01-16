@@ -1,0 +1,16 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Poll SCM') {
+            steps {
+               checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/anoopraj467/ansible']])
+            }
+        }
+        stage('Install Docker'){
+            steps{
+                ansiblePlaybook credentialsId: 'root', disableHostKeyChecking: true, installation: 'ansible2', inventory: 'dev.inv', playbook: 'docker.yml'
+            }
+        }
+    }
+}
